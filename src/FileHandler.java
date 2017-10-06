@@ -2,6 +2,8 @@ import java.util.List;
 
 import org.apache.thrift.TException;
 
+import javafx.scene.Node;
+
 public class FileHandler implements FileStore.Iface{
 
 	public FileHandler(int port){
@@ -24,6 +26,11 @@ public class FileHandler implements FileStore.Iface{
 	@Override
 	public void setFingertable(List<NodeID> node_list) throws TException {
 		// TODO Auto-generated method stub
+		for(Node node : node_list) {
+			System.out.println("Node Id " + node.getId());
+			System.out.println("Node ip "+ node.getIp());
+			System.out.println("port " + node.getPort());
+		}
 		
 	}
 
