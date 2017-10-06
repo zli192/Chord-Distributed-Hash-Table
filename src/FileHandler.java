@@ -26,7 +26,7 @@ public class FileHandler implements FileStore.Iface{
 	@Override
 	public void setFingertable(List<NodeID> node_list) throws TException {
 		// TODO Auto-generated method stub
-		for(Node node : node_list) {
+		for(NodeID node : node_list) {
 			System.out.println("Node Id " + node.getId());
 			System.out.println("Node ip "+ node.getIp());
 			System.out.println("port " + node.getPort());
