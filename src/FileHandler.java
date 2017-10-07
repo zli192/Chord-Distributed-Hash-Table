@@ -6,6 +6,8 @@ import javafx.scene.Node;
 
 public class FileHandler implements FileStore.Iface{
 
+	private List<NodeID> nodeList;
+	
 	public FileHandler(int port){
 			
 			
@@ -27,6 +29,8 @@ public class FileHandler implements FileStore.Iface{
 	public void setFingertable(List<NodeID> node_list) throws TException {
 		// TODO Auto-generated method stub
 		for(NodeID node : node_list) {
+			nodeList.add(node);
+			
 			System.out.println("Node Id " + node.getId());
 			System.out.println("Node ip "+ node.getIp());
 			System.out.println("port " + node.getPort());
@@ -47,9 +51,13 @@ public class FileHandler implements FileStore.Iface{
 	}
 
 	@Override
-	public NodeID getNodeSucc() throws TException {
-		// TODO Auto-generated method stub
-		return null;
+	public NodeID getNodeSucc() throws TException, SystemException {
+		NodeID successorNode = null;
+		if(nodeList.size()>0){
+			succNode = nodeList.get(0);
+		}
+		
+		return successorNode;				
 	}
 
 }
