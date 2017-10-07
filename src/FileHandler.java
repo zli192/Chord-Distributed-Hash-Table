@@ -1,4 +1,4 @@
-import java.util.List;
+import java.util.*;
 
 import org.apache.thrift.TException;
 
@@ -6,10 +6,10 @@ import javafx.scene.Node;
 
 public class FileHandler implements FileStore.Iface{
 
-	private List<NodeID> nodeList;
+	private static List<NodeID> nodeList;
 	
 	public FileHandler(int port){
-			
+		nodeList = new ArrayList<NodeID>();		
 			
 	}
 
@@ -54,7 +54,7 @@ public class FileHandler implements FileStore.Iface{
 	public NodeID getNodeSucc() throws TException, SystemException {
 		NodeID successorNode = null;
 		if(nodeList.size()>0){
-			succNode = nodeList.get(0);
+			successorNode = nodeList.get(0);
 		}
 		
 		return successorNode;				

@@ -26,7 +26,7 @@ public class JavaClient {
 
 	    NodeID node = client.getNodeSucc();
 	    
-	    System.out.println("Id of " + args[0] + "is " + node.getId() + " ip: " + node.getIp());
+	    System.out.println("Succ of " + args[1] + "is---  " + node.getId() + " ip: " + node.getIp());
 
 	      transport.close();
 	    } catch (TException x) {
