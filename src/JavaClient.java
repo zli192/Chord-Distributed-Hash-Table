@@ -9,6 +9,7 @@ import org.apache.thrift.protocol.TProtocol;
 public class JavaClient {
 
 	public static void main(String[] args) {
+		
 		if (args.length != 2) {
 		      System.out.println("Please enter [ip] [port]");
 		      System.exit(0);
@@ -27,8 +28,8 @@ public class JavaClient {
 	    //NodeID node = client.getNodeSucc();
 	    //System.out.println("Succ of " + args[1] + "is---  " + node.getId() + " ip: " + node.getIp());
 
-        String Key = "";
-        NodeID node1 = client.findSucc(null);
+        String Key = "57718992060475a9f120f82b4daeac91cdedd950c4868b74157abe1562759cfd";
+        NodeID node1 = client.findSucc(Key);
         System.out.println("findSucc Id -> " + node1.getId());
 	      transport.close();
 	    } catch (TException x) {

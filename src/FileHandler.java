@@ -3,9 +3,19 @@ import java.security.MessageDigest;
 import java.util.*;
 
 import org.apache.thrift.TException;
+import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
 import javafx.scene.Node;
-
+import java.io.UnsupportedEncodingException;
+	    
 public class FileHandler implements FileStore.Iface{
 
 	private static List<NodeID> nodeList;
@@ -66,9 +76,8 @@ public class FileHandler implements FileStore.Iface{
 			        try {
 			        	succNode = client.getNodeSucc();  
 			        }catch(SystemException systemException) {
-				    	throw systemException;
-				    	System.exit(0);
-				    }	
+				    	throw systemException;    	
+				}	
 	
 				    transport.close();
 			    } 		  
@@ -84,8 +93,8 @@ public class FileHandler implements FileStore.Iface{
 	@Override
 	public NodeID findPred(String key) throws TException {
 		
-		String currentNodeIPAddr;
-		String nodeId;
+		String currentNodeIPAddr = "";
+		String nodeId = "";
 		
 		try {
 			currentNodeIPAddr = InetAddress.getLocalHost().getHostAddress();
@@ -124,21 +133,33 @@ public class FileHandler implements FileStore.Iface{
 	 * @return
 	 */
 	private String getSHA256Hash(String str) {
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		byte[] encodedhash = digest.digest(str.getBytes(StandardCharsets.UTF_8));
+		
+	try{
+		MessageDigest  digest = MessageDigest.getInstance("SHA-256");
+	
+		byte[] encodedhash = digest.digest(str.getBytes("UTF-8"));
 		
 		 StringBuffer hexString = new StringBuffer();
 		 
-	    for (int i = 0; i < encodedhash.length; i++) {	
-	    	String hex = Integer.toHexString(0xff & hash[i]);
+		 for (int i = 0; i < encodedhash.length; i++) {	
+	    		String hex = Integer.toHexString(0xff & encodedhash[i]);
 	    
-	    	if(hex.length() == 1)
-	    		hexString.append('0');
+	    		if(hex.length() == 1)
+	    			hexString.append('0');
 	        
-	    	hexString.append(hex);
-	    }
+	    		hexString.append(hex);
+	    	}
 	    
 	    return hexString.toString();
+
+	} catch(NoSuchAlgorithmException e){
+		e.printStackTrace();	    
+		throw new RuntimeException(e);
+	}catch (UnsupportedEncodingException exception){
+		exception.printStackTrace();
+		throw new RuntimeException(exception);
 	}
 
-}
+
+	}
+}	
