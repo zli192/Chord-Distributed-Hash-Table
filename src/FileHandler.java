@@ -89,7 +89,7 @@ public class FileHandler implements FileStore.Iface{
 						    String host = predecessorNode.getIp();
 						    int portNum = predecessorNode.getPort();
 						    
-						    System.out.println("Predecessor Node ip and port " + host + "-" + portNum);
+						System.out.println("Predecessor GOT is " + host + ":" + portNum);
 					        transport = new TSocket(host,portNum);
 					        transport.open();	     
 			
@@ -121,17 +121,16 @@ public class FileHandler implements FileStore.Iface{
 		
 		String currentNodeIPAddr = "";
 		String nodeId = "";
-		NodeId predNode = null;
+		NodeID predNode = null;
 		try {
 			currentNodeIPAddr = InetAddress.getLocalHost().getHostAddress();
 		}catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		System.out.println("currentNodeIp addr is " + currentNodeIPAddr + ":" + currentNodePortNum);
+		System.out.println("I am " + currentNodeIPAddr + ":" + currentNodePortNum);
 		
 		String value = currentNodeIPAddr + ":" +Integer.toString(currentNodePortNum);
 		nodeId = getSHA256Hash(value);
-		System.out.println("generate Nodeid is " + nodeId);
 		
 		NodeID currentNode = new NodeID();
 		currentNode.setId(nodeId);
@@ -140,19 +139,12 @@ public class FileHandler implements FileStore.Iface{
 		
 		predNode = currentNode;
 		while(!(predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) {
-			
+			System.out.println("Yeah.!! not between current and succ");	
 			predNode = closetPrecedingFinger(key, currentNode);
 			
 			predNode = makeRPCCall(predNode, key);
 		}
 		
-		/*if( (currentNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0) ) {
-			predNode = currentNode;
-		}else {
-			
-			closetPrecedingFinger(key, currentNode);
-			predNode = currentNode;
-		}*/
 		
 		return predNode;
 	}
@@ -162,10 +154,11 @@ public class FileHandler implements FileStore.Iface{
 		for(int i=nodeList.size()-1; i>=0 ;i--) {
 			String id = nodeList.get(i).getId();
 			if(id.compareTo(currentNode.getId()) > 0 && id.compareTo(key) < 0) {
+				System.out.println("Node selected from FT- "+nodeList.get(i).getId());
 				return nodeList.get(i);
 			}
 		}
-		
+		System.out.println("---------Node Selected from FT - "+ currentNode.getId());
 		return currentNode;
 	}
 	

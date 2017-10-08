@@ -29,8 +29,8 @@ public class JavaClient {
 	    //System.out.println("Succ of " + args[1] + "is---  " + node.getId() + " ip: " + node.getIp());
 
         String Key = "48718992060475a9f120f82b4daeac91cdedd950c4868b74157abe1562759dff";
-        NodeID node1 = client.findSucc(Key);
-        System.out.println("findSucc Id -> " + node1.getId());
+        NodeID node1 = client.findPred(Key);
+        System.out.println("findPred Id -> " + node1.getId());
 	      transport.close();
 	    } catch (TException x) {
 	      x.printStackTrace();
