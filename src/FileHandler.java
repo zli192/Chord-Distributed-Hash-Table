@@ -121,7 +121,7 @@ public class FileHandler implements FileStore.Iface{
 		
 		String currentNodeIPAddr = "";
 		String nodeId = "";
-		
+		NodeId predNode = null;
 		try {
 			currentNodeIPAddr = InetAddress.getLocalHost().getHostAddress();
 		}catch (UnknownHostException e) {
@@ -138,7 +138,65 @@ public class FileHandler implements FileStore.Iface{
 		currentNode.setIp(currentNodeIPAddr);
 		currentNode.setPort(currentNodePortNum);
 		
+		predNode = currentNode;
+		while(!(predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) {
+			
+			predNode = closetPrecedingFinger(key, currentNode);
+			
+			predNode = makeRPCCall(predNode, key);
+		}
+		
+		/*if( (currentNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0) ) {
+			predNode = currentNode;
+		}else {
+			
+			closetPrecedingFinger(key, currentNode);
+			predNode = currentNode;
+		}*/
+		
+		return predNode;
+	}
+	
+	private NodeID closetPrecedingFinger(String key, NodeID currentNode) {
+		
+		for(int i=nodeList.size()-1; i>=0 ;i--) {
+			String id = nodeList.get(i).getId();
+			if(id.compareTo(currentNode.getId()) > 0 && id.compareTo(key) < 0) {
+				return nodeList.get(i);
+			}
+		}
+		
 		return currentNode;
+	}
+	
+	public NodeID makeRPCCall(NodeID node, String key) {
+		NodeID predNode=null;
+		
+		 try {
+			    TTransport transport;
+			    String host = node.getIp();
+			    int portNum = node.getPort();
+			    
+		        transport = new TSocket(host,portNum);
+		        transport.open();	     
+
+		        TProtocol protocol = new  TBinaryProtocol(transport);
+		        FileStore.Client client = new FileStore.Client(protocol);
+
+		        try {
+		        	predNode = client.findPred(key);  
+		        }catch(SystemException systemException) {
+			    	throw systemException;    	
+			}	
+
+			    transport.close();
+		    } 		  
+		  	catch (TException x) {
+		      x.printStackTrace();
+		      System.exit(0);
+		    }
+		
+		return predNode;
 	}
 
 	@Override
