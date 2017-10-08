@@ -57,34 +57,53 @@ public class FileHandler implements FileStore.Iface{
 		NodeID succNode = null;
 		NodeID predecessorNode = null; 
 		
-		predecessorNode = findPred(key);
+		String currentNodeIPAddr = "";
+		String nodeId = "";
 		
-		//get its successor
-		if(predecessorNode != null) {
-			  try {
-				    TTransport transport;
-				    String host = predecessorNode.getIp();
-				    int portNum = predecessorNode.getPort();
-				    
-				    System.out.println("Predecessor Node ip and port " + host + "-" + portNum);
-			        transport = new TSocket(host,portNum);
-			        transport.open();	     
-	
-			        TProtocol protocol = new  TBinaryProtocol(transport);
-			        FileStore.Client client = new FileStore.Client(protocol);
-	
-			        try {
-			        	succNode = client.getNodeSucc();  
-			        }catch(SystemException systemException) {
-				    	throw systemException;    	
-				}	
-	
-				    transport.close();
-			    } 		  
-			  	catch (TException x) {
-			      x.printStackTrace();
-			      System.exit(0);
-			    }
+		try {
+			currentNodeIPAddr = InetAddress.getLocalHost().getHostAddress();
+		}catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		String value = currentNodeIPAddr + ":" +Integer.toString(currentNodePortNum);
+		nodeId = getSHA256Hash(value);
+		
+		if(nodeId.compareToIgnoreCase(key) == 0) {
+			succNode = new NodeID();
+			succNode.setId(nodeId);
+			succNode.setIp(currentNodeIPAddr);
+			succNode.setPort(currentNodePortNum);
+		}else {
+			predecessorNode = findPred(key);
+			
+			//get its successor
+			if(predecessorNode != null) {
+				  try {
+					    TTransport transport;
+					    String host = predecessorNode.getIp();
+					    int portNum = predecessorNode.getPort();
+					    
+					    System.out.println("Predecessor Node ip and port " + host + "-" + portNum);
+				        transport = new TSocket(host,portNum);
+				        transport.open();	     
+		
+				        TProtocol protocol = new  TBinaryProtocol(transport);
+				        FileStore.Client client = new FileStore.Client(protocol);
+		
+				        try {
+				        	succNode = client.getNodeSucc();  
+				        }catch(SystemException systemException) {
+					    	throw systemException;    	
+					}	
+		
+					    transport.close();
+				    } 		  
+				  	catch (TException x) {
+				      x.printStackTrace();
+				      System.exit(0);
+				    }
+			}
 		}
 		
 		return succNode;
