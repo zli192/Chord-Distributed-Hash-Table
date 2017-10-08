@@ -24,10 +24,12 @@ public class JavaClient {
         TProtocol protocol = new  TBinaryProtocol(transport);
         FileStore.Client client = new FileStore.Client(protocol);
 
-	    NodeID node = client.getNodeSucc();
-	    
-	    System.out.println("Succ of " + args[1] + "is---  " + node.getId() + " ip: " + node.getIp());
+	    //NodeID node = client.getNodeSucc();
+	    //System.out.println("Succ of " + args[1] + "is---  " + node.getId() + " ip: " + node.getIp());
 
+        String Key = "";
+        NodeID node1 = client.findSucc(null);
+        System.out.println("findSucc Id -> " + node1.getId());
 	      transport.close();
 	    } catch (TException x) {
 	      x.printStackTrace();
