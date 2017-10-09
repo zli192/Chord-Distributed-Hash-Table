@@ -138,11 +138,26 @@ public class FileHandler implements FileStore.Iface{
 		currentNode.setPort(currentNodePortNum);
 		
 		predNode = currentNode;
-		while(!(predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) {
-			System.out.println("Yeah.!! not between current and succ");	
-			predNode = closetPrecedingFinger(key, currentNode);
+		
+		//If currentNode is less than successor
+		if(currentNode.getId().compareTo(getNodeSucc().getId()) < 0) {
+			System.out.println("Normal case");
+			while(!(predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) {
+				System.out.println("Yeah.!! not between current and succ");	
+				predNode = closetPrecedingFinger(key, currentNode);
+				
+				predNode = makeRPCCall(predNode, key);
+			}
 			
-			predNode = makeRPCCall(predNode, key);
+		}else {
+			//If current node is greater than successor
+			while(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) < 0)
+					|| (predNode.getId().compareTo(key) > 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
+				System.out.println("Not between current and succ");
+				predNode = closetPrecedingFinger(key, currentNode);
+				
+				predNode = makeRPCCall(predNode, key);
+			}
 		}
 		
 		
@@ -150,16 +165,25 @@ public class FileHandler implements FileStore.Iface{
 	}
 	
 	private NodeID closetPrecedingFinger(String key, NodeID currentNode) {
+		NodeID selectedNode = currentNode;
 		
 		for(int i=nodeList.size()-1; i>=0 ;i--) {
 			String id = nodeList.get(i).getId();
-			if(id.compareTo(currentNode.getId()) > 0 && id.compareTo(key) < 0) {
-				System.out.println("Node selected from FT- "+nodeList.get(i).getId());
-				return nodeList.get(i);
+			
+			if(currentNode.getId().compareTo(key) < 0) {
+				System.out.println("Normal case for FT");
+				if(currentNode.getId().compareTo(id) < 0 && key.compareTo(id) > 0) {
+					selectedNode =  nodeList.get(i);
+				}
+			}else {
+				if((currentNode.getId().compareTo(id)<0 && key.compareTo(id)<0)
+					||(currentNode.getId().compareTo(id)>0 && key.compareTo(id)>0)) {
+					selectedNode = nodeList.get(i);
+				}
 			}
 		}
-		System.out.println("---------Node Selected from FT - "+ currentNode.getId());
-		return currentNode;
+		System.out.println("---------Node Selected from FT - "+ selectedNode.getId());
+		return selectedNode;
 	}
 	
 	public NodeID makeRPCCall(NodeID node, String key) {
