@@ -140,13 +140,17 @@ public class FileHandler implements FileStore.Iface{
 		predNode = currentNode;
 		
 		//If currentNode is less than successor
-		if(currentNode.getId().compareTo(getNodeSucc().getId()) < 0) {
+		if(predNode.getId().compareTo(getNodeSucc().getId()) < 0) {
 			System.out.println("Normal case");
-			while(!(predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) {
+			while(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
 				System.out.println("Yeah.!! not between current and succ");	
-				predNode = closetPrecedingFinger(key, currentNode);
+				predNode = closetPrecedingFinger(key, predNode);
 				
 				predNode = makeRPCCall(predNode, key);
+				System.out.println(predNode.getPort());
+				System.out.println(getNodeSucc().getPort());
+				break;
+			
 			}
 			
 		}else {
@@ -154,9 +158,10 @@ public class FileHandler implements FileStore.Iface{
 			while(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) < 0)
 					|| (predNode.getId().compareTo(key) > 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
 				System.out.println("Not between current and succ");
-				predNode = closetPrecedingFinger(key, currentNode);
+				predNode = closetPrecedingFinger(key, predNode);
 				
 				predNode = makeRPCCall(predNode, key);
+			
 			}
 		}
 		
@@ -174,11 +179,14 @@ public class FileHandler implements FileStore.Iface{
 				System.out.println("Normal case for FT");
 				if(currentNode.getId().compareTo(id) < 0 && key.compareTo(id) > 0) {
 					selectedNode =  nodeList.get(i);
+					break;
 				}
 			}else {
+				System.out.println("Abnormal case for FT");
 				if((currentNode.getId().compareTo(id)<0 && key.compareTo(id)<0)
 					||(currentNode.getId().compareTo(id)>0 && key.compareTo(id)>0)) {
 					selectedNode = nodeList.get(i);
+					break;
 				}
 			}
 		}
@@ -187,13 +195,15 @@ public class FileHandler implements FileStore.Iface{
 	}
 	
 	public NodeID makeRPCCall(NodeID node, String key) {
+		
 		NodeID predNode=null;
 		
 		 try {
 			    TTransport transport;
 			    String host = node.getIp();
 			    int portNum = node.getPort();
-			    
+			   
+			  System.out.println("RPC call to - " + host + ":" + portNum);  
 		        transport = new TSocket(host,portNum);
 		        transport.open();	     
 
