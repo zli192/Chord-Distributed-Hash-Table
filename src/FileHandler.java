@@ -142,20 +142,19 @@ public class FileHandler implements FileStore.Iface{
 		//If currentNode is less than successor
 		if(predNode.getId().compareTo(getNodeSucc().getId()) < 0) {
 			System.out.println("Normal case");
-			while(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
+			if(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
 				System.out.println("Yeah.!! not between current and succ");	
 				predNode = closetPrecedingFinger(key, predNode);
 				
 				predNode = makeRPCCall(predNode, key);
 				System.out.println(predNode.getPort());
 				System.out.println(getNodeSucc().getPort());
-				break;
 			
 			}
 			
 		}else {
 			//If current node is greater than successor
-			while(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) < 0)
+			if(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) < 0)
 					|| (predNode.getId().compareTo(key) > 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
 				System.out.println("Not between current and succ");
 				predNode = closetPrecedingFinger(key, predNode);
