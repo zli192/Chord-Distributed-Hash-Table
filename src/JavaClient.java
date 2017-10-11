@@ -42,10 +42,10 @@ public class JavaClient {
     		metadata.setFilename("example.txt");
         	metadata.setOwner("sarang");
         	
-        	file.setContent("This is new file1");
+        	file.setContent("This is old file1");
         	file.setMeta(metadata);
         	
-        	client.writeFile(file);
+        //	client.writeFile(file);
         	
         	//code to call read
         	RFile file1 = null;
@@ -56,7 +56,7 @@ public class JavaClient {
         	System.out.println("owner-> "+ file1.getMeta().getOwner());
         	System.out.println("filename-> "+ file1.getMeta().getFilename());
         	
-        	//file1 = client.readFile("sldfja.txt", "pawan");
+        //	file1 = client.readFile("sldfja.txt", "pawan");
         	
         	
 	      transport.close();

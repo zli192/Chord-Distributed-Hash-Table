@@ -115,7 +115,7 @@ public class FileHandler implements FileStore.Iface{
 		RFileMetadata serverFileMetadata = null;
 		SystemException exception = null;
 		
-		if(rFile != null) {
+
 			try {
 				currentIpAddress = InetAddress.getLocalHost().getHostAddress();
 			}catch (UnknownHostException e) {
@@ -150,7 +150,7 @@ public class FileHandler implements FileStore.Iface{
 				throw exception;
 			}
 			
-		}	
+			
 		return serverRFile;
 	}
 
