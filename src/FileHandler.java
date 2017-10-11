@@ -7,6 +7,7 @@ import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
+import org.omg.PortableServer.ThreadPolicyOperations;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 
@@ -14,22 +15,89 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import javafx.scene.Node;
+
+import java.io.File;
+import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
 	    
 public class FileHandler implements FileStore.Iface{
 
 	private static List<NodeID> nodeList;
 	private int currentNodePortNum = 0;
+	private String currentIpAddress;
+	private static Map<String, RFile> fileArsenal;
 	
-	public FileHandler(int port){
+	
+	public FileHandler(int port, String ipAddr){
 		currentNodePortNum = port;
+		currentIpAddress = currentNodeIPAddr = InetAddress.getLocalHost().getHostAddress();
 		nodeList = new ArrayList<NodeID>();		
-			
+		fileArsenal = new HashMap<String, RFile>();
 	}
 
 	@Override
 	public void writeFile(RFile rFile) throws TException {
-		// TODO Auto-generated method stub
+		RFile serverRFile = null;
+		RFileMetadata serverFileMetadata = null;
+		
+		if(rFile != null) {
+			
+			String ipPort = currentIpAddress + ":" currentNodePortNum;
+			String currentNodeKey = getSHA256Hash(ipPort);
+
+			RFileMetadata fileMetadata = rFile.getMeta();
+			String fileName = fileMetadata.getFilename();
+			String owner = fileMetadata.getOwner();
+			String content = rFile.getContent();
+			
+			String value = fileName + ":" + owner;
+			String fileId = getSHA256Hash(value);
+			System.out.println("File ID is-> "+ fileId);
+			
+			NodeID fileSucc = findSucc(fileId);
+			
+			//Check if current node owns given file ID
+			if(fileSucc.getId().compareTo(currentNodeKey) == 0) {
+				System.out.println("Server owns file ID");
+				
+				if(fileArsenal.containsKey(fileId)) {
+					System.out.println("File already present");
+					int version = fileArsenal.get(fileId).getMeta().getVersion();
+					
+					fileArsenal.get(fileId).getMeta().setVersion(version+1);
+					fileArsenal.get(fileId).setContent(content);
+					
+					System.out.println("updated version-> "+ fileArsenal.get(fileId).getMeta().getVersion());
+				}else {
+					System.out.println("File not present on server");
+					serverFileMetadata = new RFileMetadata();
+					serverRFile = new RFile();
+					
+					serverFileMetadata.setFilename(fileName);
+					serverFileMetadata.setOwner(owner);
+					serverFileMetadata.setVersion(0);
+					
+					File file = new File(".");
+					FileWriter fileWriter = new FileWriter(file);
+					fileWriter.write(content);
+					fileWriter.close();
+					
+					String contentHash = getSHA256Hash(content);
+					serverFileMetadata.setContentHash(contentHash);
+					
+					serverRFile.setContent(content);
+					serverRFile.setMeta(serverFileMetadata);
+					
+					fileArsenal.put(fileId, serverRFile);
+				}
+			}else {
+				SystemException exception = new SystemException();
+				exception.setMessage("Server does not own given file ID");
+				throw exception;
+			}
+			
+			
+		}
 		
 	}
 
