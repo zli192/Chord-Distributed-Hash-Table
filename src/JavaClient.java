@@ -35,16 +35,29 @@ public class JavaClient {
 	//NodeID node2 = client.findSucc(Key);
 	//System.out.println("findSucc id -> "+ node2.getId());
 
+        	//code to call write 
         	RFile file = new RFile();
         	RFileMetadata metadata = new RFileMetadata();
     		   
     		metadata.setFilename("example.txt");
         	metadata.setOwner("sarang");
         	
-        	file.setContent("This is new file");
+        	file.setContent("This is new file1");
         	file.setMeta(metadata);
         	
         	client.writeFile(file);
+        	
+        	//code to call read
+        	RFile file1 = null;
+        	System.out.println("Call to example.txt");
+        	file1 = client.readFile("example.txt", "sarang");
+        	System.out.println("content-> "+file1.getContent());
+        	System.out.println("version-> "+ file1.getMeta().getVersion());
+        	System.out.println("owner-> "+ file1.getMeta().getOwner());
+        	System.out.println("filename-> "+ file1.getMeta().getFilename());
+        	
+        	//file1 = client.readFile("sldfja.txt", "pawan");
+        	
         	
 	      transport.close();
 	    } catch (TException x) {

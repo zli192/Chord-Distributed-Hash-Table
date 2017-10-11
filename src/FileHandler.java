@@ -31,7 +31,6 @@ public class FileHandler implements FileStore.Iface{
 	
 	public FileHandler(int port){
 		currentNodePortNum = port;
-		
 		nodeList = new ArrayList<NodeID>();		
 		fileArsenal = new HashMap<String, RFile>();
 	}
@@ -112,17 +111,54 @@ public class FileHandler implements FileStore.Iface{
 
 	@Override
 	public RFile readFile(String filename, String owner) throws TException {
-		// TODO Auto-generated method stub
-		return null;
+		RFile serverRFile = null;
+		RFileMetadata serverFileMetadata = null;
+		SystemException exception = null;
+		
+		if(rFile != null) {
+			try {
+				currentIpAddress = InetAddress.getLocalHost().getHostAddress();
+			}catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+			String ipPort = currentIpAddress + ":" + Integer.toString(currentNodePortNum);
+			String currentNodeKey = getSHA256Hash(ipPort);
+			
+			String value = filename + ":" + owner;
+			String fileId = getSHA256Hash(value);
+			System.out.println("File ID is-> "+ fileId);
+			
+			NodeID fileSucc = findSucc(fileId);
+			
+			//Check if current node owns given file ID
+			if(fileSucc.getId().compareTo(currentNodeKey) == 0) {
+				System.out.println("Server owns file ID");
+				
+				if(fileArsenal.containsKey(fileId)) {
+					System.out.println("File is present on server");
+					serverRFile = fileArsenal.get(fileId);
+					
+				}else {
+					exception = new SystemException();
+					exception.setMessage("File with given filename="+filename+ " and owner="+owner+ " is not present on server");
+					throw exception;
+				}
+				
+			}else {
+				exception = new SystemException();
+				exception.setMessage("Server does not own given file ID");
+				throw exception;
+			}
+			
+		}	
+		return serverRFile;
 	}
 
 	@Override
 	public void setFingertable(List<NodeID> node_list) throws TException {
 		
-		
 		for(NodeID node : node_list) {
 			nodeList.add(node);
-			
 			System.out.println("Node Id " + node.getId());
 			System.out.println("Node ip "+ node.getIp());
 			System.out.println("port " + node.getPort());
@@ -167,7 +203,6 @@ public class FileHandler implements FileStore.Iface{
 						    String host = predecessorNode.getIp();
 						    int portNum = predecessorNode.getPort();
 						    
-						System.out.println("Predecessor GOT is " + host + ":" + portNum);
 					        transport = new TSocket(host,portNum);
 					        transport.open();	     
 			
@@ -205,7 +240,6 @@ public class FileHandler implements FileStore.Iface{
 		}catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		System.out.println("I am " + currentNodeIPAddr + ":" + currentNodePortNum);
 		
 		String value = currentNodeIPAddr + ":" +Integer.toString(currentNodePortNum);
 		nodeId = getSHA256Hash(value);
@@ -219,22 +253,15 @@ public class FileHandler implements FileStore.Iface{
 		
 		//If currentNode is less than successor
 		if(predNode.getId().compareTo(getNodeSucc().getId()) < 0) {
-			System.out.println("Normal case");
 			if(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
-				System.out.println("Yeah.!! not between current and succ");	
 				predNode = closetPrecedingFinger(key, predNode);
-				
 				predNode = makeRPCCall(predNode, key);
-				System.out.println(predNode.getPort());
-				System.out.println(getNodeSucc().getPort());
-			
 			}
 			
 		}else {
 			//If current node is greater than successor
 			if(!((predNode.getId().compareTo(key) < 0) && (getNodeSucc().getId().compareTo(key) < 0)
 					|| (predNode.getId().compareTo(key) > 0) && (getNodeSucc().getId().compareTo(key) > 0)) ) {
-				System.out.println("Not between current and succ");
 				predNode = closetPrecedingFinger(key, predNode);
 				
 				predNode = makeRPCCall(predNode, key);
@@ -242,10 +269,15 @@ public class FileHandler implements FileStore.Iface{
 			}
 		}
 		
-		
 		return predNode;
 	}
 	
+	/**
+	 * This function is used to iterate over finger table of current node and return node from FT if it belongs to (currentId, key)
+	 * @param key
+	 * @param currentNode
+	 * @return
+	 */
 	private NodeID closetPrecedingFinger(String key, NodeID currentNode) {
 		NodeID selectedNode = currentNode;
 		
@@ -253,13 +285,11 @@ public class FileHandler implements FileStore.Iface{
 			String id = nodeList.get(i).getId();
 			
 			if(currentNode.getId().compareTo(key) < 0) {
-				System.out.println("Normal case for FT");
 				if(currentNode.getId().compareTo(id) < 0 && key.compareTo(id) > 0) {
 					selectedNode =  nodeList.get(i);
 					break;
 				}
 			}else {
-				System.out.println("Abnormal case for FT");
 				if((currentNode.getId().compareTo(id)<0 && key.compareTo(id)<0)
 					||(currentNode.getId().compareTo(id)>0 && key.compareTo(id)>0)) {
 					selectedNode = nodeList.get(i);
@@ -271,6 +301,12 @@ public class FileHandler implements FileStore.Iface{
 		return selectedNode;
 	}
 	
+	/**
+	 * This function makes RPC call to input node
+	 * @param node
+	 * @param key
+	 * @return
+	 */
 	public NodeID makeRPCCall(NodeID node, String key) {
 		
 		NodeID predNode=null;
@@ -280,7 +316,6 @@ public class FileHandler implements FileStore.Iface{
 			    String host = node.getIp();
 			    int portNum = node.getPort();
 			   
-			  System.out.println("RPC call to - " + host + ":" + portNum);  
 		        transport = new TSocket(host,portNum);
 		        transport.open();	     
 
@@ -306,10 +341,13 @@ public class FileHandler implements FileStore.Iface{
 	@Override
 	public NodeID getNodeSucc() throws TException {
 		NodeID successorNode = null;
+		SystemException exception = null;
 		if(nodeList.size()>0){
 			successorNode = nodeList.get(0);
 		}else {
-			throw new SystemException();
+			exception = new SystemException();
+			exception.setMessage("Finger Table does not exists on this node");
+			throw exception;
 		}
 		return successorNode;				
 	}
@@ -347,7 +385,5 @@ public class FileHandler implements FileStore.Iface{
 		exception.printStackTrace();
 		throw new RuntimeException(exception);
 	}
-
-
 	}
 }	
