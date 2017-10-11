@@ -36,7 +36,7 @@ public class JavaClient {
 	//System.out.println("findSucc id -> "+ node2.getId());
 
         	RFile file = new RFile();
-        	RFileMetadata metadata = new RFileMetadata(;)
+        	RFileMetadata metadata = new RFileMetadata();
     		   
     		metadata.setFilename("example.txt");
         	metadata.setOwner("sarang");
@@ -44,7 +44,7 @@ public class JavaClient {
         	file.setContent("This is new file");
         	file.setMeta(metadata);
         	
-        	client.writeFile(rFile);
+        	client.writeFile(file);
         	
 	      transport.close();
 	    } catch (TException x) {

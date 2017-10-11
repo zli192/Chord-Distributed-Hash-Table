@@ -19,7 +19,8 @@ import javafx.scene.Node;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
-	    
+import java.io.IOException;
+
 public class FileHandler implements FileStore.Iface{
 
 	private static List<NodeID> nodeList;
@@ -28,9 +29,9 @@ public class FileHandler implements FileStore.Iface{
 	private static Map<String, RFile> fileArsenal;
 	
 	
-	public FileHandler(int port, String ipAddr){
+	public FileHandler(int port){
 		currentNodePortNum = port;
-		currentIpAddress = currentNodeIPAddr = InetAddress.getLocalHost().getHostAddress();
+		
 		nodeList = new ArrayList<NodeID>();		
 		fileArsenal = new HashMap<String, RFile>();
 	}
@@ -41,8 +42,12 @@ public class FileHandler implements FileStore.Iface{
 		RFileMetadata serverFileMetadata = null;
 		
 		if(rFile != null) {
-			
-			String ipPort = currentIpAddress + ":" currentNodePortNum;
+			try {
+				currentIpAddress = InetAddress.getLocalHost().getHostAddress();
+			}catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+			String ipPort = currentIpAddress + ":" + Integer.toString(currentNodePortNum);
 			String currentNodeKey = getSHA256Hash(ipPort);
 
 			RFileMetadata fileMetadata = rFile.getMeta();
@@ -77,11 +82,15 @@ public class FileHandler implements FileStore.Iface{
 					serverFileMetadata.setOwner(owner);
 					serverFileMetadata.setVersion(0);
 					
-					File file = new File(".");
+					try{
+
+					File file = new File(fileName);
 					FileWriter fileWriter = new FileWriter(file);
 					fileWriter.write(content);
 					fileWriter.close();
-					
+					}catch(IOException ioe){
+						ioe.printStackTrace();
+					}
 					String contentHash = getSHA256Hash(content);
 					serverFileMetadata.setContentHash(contentHash);
 					
@@ -109,7 +118,8 @@ public class FileHandler implements FileStore.Iface{
 
 	@Override
 	public void setFingertable(List<NodeID> node_list) throws TException {
-		// TODO Auto-generated method stub
+		
+		
 		for(NodeID node : node_list) {
 			nodeList.add(node);
 			
