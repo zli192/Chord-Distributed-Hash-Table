@@ -28,13 +28,24 @@ public class JavaClient {
 	    //NodeID node = client.getNodeSucc();
 	    //System.out.println("Succ of " + args[1] + "is---  " + node.getId() + " ip: " + node.getIp());
 
-        String Key = "008db28ca4b72d8a7963fed58cdf2569ef3ed6c1835f041d98032e40a69e5a10";
-        NodeID node1 = client.findPred(Key);
-        System.out.println("findPred Id -> " + node1.getId());
+       // String Key = "008db28ca4b72d8a7963fed58cdf2569ef3ed6c1835f041d98032e40a69e5a10";
+        //NodeID node1 = client.findPred(Key);
+        //System.out.println("findPred Id -> " + node1.getId());
 
-	NodeID node2 = client.findSucc(Key);
-	System.out.println("findSucc id -> "+ node2.getId());
+	//NodeID node2 = client.findSucc(Key);
+	//System.out.println("findSucc id -> "+ node2.getId());
 
+        	RFile file = new RFile();
+        	RFileMetadata metadata = new RFileMetadata(;)
+    		   
+    		metadata.setFilename("example.txt");
+        	metadata.setOwner("sarang");
+        	
+        	file.setContent("This is new file");
+        	file.setMeta(metadata);
+        	
+        	client.writeFile(rFile);
+        	
 	      transport.close();
 	    } catch (TException x) {
 	      x.printStackTrace();
