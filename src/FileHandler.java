@@ -56,24 +56,19 @@ public class FileHandler implements FileStore.Iface{
 			
 			String value = fileName + ":" + owner;
 			String fileId = getSHA256Hash(value);
-			System.out.println("File ID is-> "+ fileId);
 			
 			NodeID fileSucc = findSucc(fileId);
 			
 			//Check if current node owns given file ID
 			if(fileSucc.getId().compareTo(currentNodeKey) == 0) {
-				System.out.println("Server owns file ID");
 				
 				if(fileArsenal.containsKey(fileId)) {
-					System.out.println("File already present");
 					int version = fileArsenal.get(fileId).getMeta().getVersion();
 					
 					fileArsenal.get(fileId).getMeta().setVersion(version+1);
 					fileArsenal.get(fileId).setContent(content);
 					
-					System.out.println("updated version-> "+ fileArsenal.get(fileId).getMeta().getVersion());
 				}else {
-					System.out.println("File not present on server");
 					serverFileMetadata = new RFileMetadata();
 					serverRFile = new RFile();
 					
@@ -89,6 +84,7 @@ public class FileHandler implements FileStore.Iface{
 					fileWriter.close();
 					}catch(IOException ioe){
 						ioe.printStackTrace();
+						System.exit(0);
 					}
 					String contentHash = getSHA256Hash(content);
 					serverFileMetadata.setContentHash(contentHash);
@@ -114,56 +110,45 @@ public class FileHandler implements FileStore.Iface{
 		RFile serverRFile = null;
 		RFileMetadata serverFileMetadata = null;
 		SystemException exception = null;
-		
 
-			try {
-				currentIpAddress = InetAddress.getLocalHost().getHostAddress();
-			}catch (UnknownHostException e) {
-				e.printStackTrace();
-			}
-			String ipPort = currentIpAddress + ":" + Integer.toString(currentNodePortNum);
-			String currentNodeKey = getSHA256Hash(ipPort);
+		try {
+			currentIpAddress = InetAddress.getLocalHost().getHostAddress();
+		}catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		String ipPort = currentIpAddress + ":" + Integer.toString(currentNodePortNum);
+		String currentNodeKey = getSHA256Hash(ipPort);
+		
+		String value = filename + ":" + owner;
+		String fileId = getSHA256Hash(value);
+		
+		NodeID fileSucc = findSucc(fileId);
+		
+		//Check if current node owns given file ID
+		if(fileSucc.getId().compareTo(currentNodeKey) == 0) {
 			
-			String value = filename + ":" + owner;
-			String fileId = getSHA256Hash(value);
-			System.out.println("File ID is-> "+ fileId);
-			
-			NodeID fileSucc = findSucc(fileId);
-			
-			//Check if current node owns given file ID
-			if(fileSucc.getId().compareTo(currentNodeKey) == 0) {
-				System.out.println("Server owns file ID");
-				
-				if(fileArsenal.containsKey(fileId)) {
-					System.out.println("File is present on server");
-					serverRFile = fileArsenal.get(fileId);
-					
-				}else {
-					exception = new SystemException();
-					exception.setMessage("File with given filename="+filename+ " and owner="+owner+ " is not present on server");
-					throw exception;
-				}
-				
+			if(fileArsenal.containsKey(fileId)) {
+				serverRFile = fileArsenal.get(fileId);
 			}else {
 				exception = new SystemException();
-				exception.setMessage("Server does not own given file ID");
+				exception.setMessage("File with given filename="+filename+ " and owner="+owner+ " is not present on server");
 				throw exception;
 			}
 			
+		}else {
+			exception = new SystemException();
+			exception.setMessage("Server does not own given file ID");
+			throw exception;
+		}
 			
 		return serverRFile;
 	}
 
 	@Override
 	public void setFingertable(List<NodeID> node_list) throws TException {
-		
 		for(NodeID node : node_list) {
 			nodeList.add(node);
-			System.out.println("Node Id " + node.getId());
-			System.out.println("Node ip "+ node.getIp());
-			System.out.println("port " + node.getPort());
 		}
-		
 	}
 
 	@Override
@@ -297,7 +282,6 @@ public class FileHandler implements FileStore.Iface{
 				}
 			}
 		}
-		System.out.println("---------Node Selected from FT - "+ selectedNode.getId());
 		return selectedNode;
 	}
 	
@@ -360,30 +344,30 @@ public class FileHandler implements FileStore.Iface{
 	 */
 	private String getSHA256Hash(String str) {
 		
-	try{
-		MessageDigest  digest = MessageDigest.getInstance("SHA-256");
-	
-		byte[] encodedhash = digest.digest(str.getBytes("UTF-8"));
+		try{
+			MessageDigest  digest = MessageDigest.getInstance("SHA-256");
 		
-		 StringBuffer hexString = new StringBuffer();
-		 
-		 for (int i = 0; i < encodedhash.length; i++) {	
-	    		String hex = Integer.toHexString(0xff & encodedhash[i]);
-	    
-	    		if(hex.length() == 1)
-	    			hexString.append('0');
-	        
-	    		hexString.append(hex);
-	    	}
-	    
-	    return hexString.toString();
-
-	} catch(NoSuchAlgorithmException e){
-		e.printStackTrace();	    
-		throw new RuntimeException(e);
-	}catch (UnsupportedEncodingException exception){
-		exception.printStackTrace();
-		throw new RuntimeException(exception);
-	}
+			byte[] encodedhash = digest.digest(str.getBytes("UTF-8"));
+			
+			 StringBuffer hexString = new StringBuffer();
+			 
+			 for (int i = 0; i < encodedhash.length; i++) {	
+		    		String hex = Integer.toHexString(0xff & encodedhash[i]);
+		    
+		    		if(hex.length() == 1)
+		    			hexString.append('0');
+		        
+		    		hexString.append(hex);
+		    	}
+		    
+		    return hexString.toString();
+	
+		} catch(NoSuchAlgorithmException e){
+			e.printStackTrace();	    
+			throw new RuntimeException(e);
+		}catch (UnsupportedEncodingException exception){
+			exception.printStackTrace();
+			throw new RuntimeException(exception);
+		}
 	}
 }	
