@@ -327,7 +327,7 @@ public class FileHandler implements FileStore.Iface{
 		NodeID successorNode = null;
 		SystemException exception = null;
 		if(nodeList.size()>0){
-			successorNode = nodeList.get(0);
+			successorNode = .get(0);
 		}else {
 			exception = new SystemException();
 			exception.setMessage("Finger Table does not exists on this node");

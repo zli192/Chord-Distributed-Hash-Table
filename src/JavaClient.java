@@ -21,8 +21,8 @@ public class JavaClient {
 		
 		
 	    try {
-	      TTransport transport;
-	   
+				TTransport transport;
+				
 	      transport = new TSocket(args[0], Integer.valueOf(args[1]));
 	      transport.open();	     
 
